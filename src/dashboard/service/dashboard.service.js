@@ -169,6 +169,29 @@ class DashboardService {
       const lostDeals = await Deal.count({ where: { stage: 'Lost' } });
       const conversionRate = totalDeals > 0 ? ((wonDeals / totalDeals) * 100).toFixed(2) : 0;
 
+      // Get top sales agents (by deal value)
+      const topSalesAgents = await Deal.findAll({
+        attributes: [
+          'assigned_to',
+          [Deal.sequelize.fn('COUNT', Deal.sequelize.col('Deal.id')), 'deal_count'],
+          [Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 'total_value']
+        ],
+        where: { 
+          stage: 'Won',
+          assigned_to: { [Op.ne]: null }
+        },
+        group: ['assigned_to'],
+        order: [[Deal.sequelize.literal('total_value'), 'DESC']],
+        limit: 3,
+        include: [
+          { 
+            model: User, 
+            as: 'assignedTo',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
+      });
+
       // Get quotation statistics
       const approvedQuotations = await Quotation.count({ where: { status: 'Approved' } });
       const pendingQuotations = await Quotation.count({ where: { status: 'Sent' } });
@@ -255,7 +278,16 @@ class DashboardService {
           won: wonDeals,
           lost: lostDeals,
           conversionRate: parseFloat(conversionRate)
-        }
+        },
+
+        // Top sales agents
+        topSalesAgents: topSalesAgents.map(agent => ({
+          userId: agent.assigned_to,
+          name: agent.assignedTo?.name || 'Unknown',
+          email: agent.assignedTo?.email || '',
+          dealCount: parseInt(agent.dataValues.deal_count),
+          totalValue: parseFloat(agent.dataValues.total_value || 0)
+        }))
       };
     } catch (error) {
       throw new Error(`Failed to get dashboard stats: ${error.message}`);

@@ -16,6 +16,7 @@ import ticketRoutes from './ticket/routes/ticket.routes.js';
 import noteRoutes from './note/routes/note.routes.js';
 import metaRoutes from './meta/routes/meta.routes.js';
 import dashboardRoutes from './dashboard/routes/dashboard.routes.js';
+import reportsRoutes from './reports/routes/reports.routes.js';
 
 // Use routes
 router.use('/users', userRoutes);
@@ -31,5 +32,6 @@ router.use('/tickets', ticketRoutes);
 router.use('/notes', noteRoutes);
 router.use('/meta', metaRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/reports', reportsRoutes);
 
 export default router;
