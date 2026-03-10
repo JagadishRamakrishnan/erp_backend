@@ -46,6 +46,19 @@ class InvoiceService {
   async updateInvoice(id, invoiceData) {
     const invoice = await Invoice.findByPk(id);
     if (!invoice) return null;
+    
+    // Recalculate due amount if total_amount or paid_amount is being updated
+    if (invoiceData.total_amount !== undefined || invoiceData.paid_amount !== undefined) {
+      const totalAmount = invoiceData.total_amount !== undefined 
+        ? invoiceData.total_amount 
+        : invoice.total_amount;
+      const paidAmount = invoiceData.paid_amount !== undefined 
+        ? invoiceData.paid_amount 
+        : invoice.paid_amount;
+      
+      invoiceData.due_amount = totalAmount - paidAmount;
+    }
+    
     return await invoice.update(invoiceData);
   }
 
