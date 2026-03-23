@@ -119,6 +119,26 @@ class MetaController {
       return errorResponse(res, error.message);
     }
   }
+
+  // Create Campaign on Facebook
+  async createCampaign(req, res) {
+    try {
+      const result = await metaService.createFacebookCampaign(req.user.id, req.body);
+      return successResponse(res, result, 'Campaign created successfully', 201);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
+  // Sync real data from Facebook API
+  async syncFromFacebook(req, res) {
+    try {
+      const result = await metaService.syncFromFacebook(req.user.id);
+      return successResponse(res, result, `Synced ${result.synced} campaigns from Facebook`);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
 }
 
 export default new MetaController();

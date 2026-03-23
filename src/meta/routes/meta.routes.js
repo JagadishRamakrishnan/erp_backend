@@ -33,6 +33,12 @@ router.get('/dashboard', authenticate, metaController.getDashboard);
 // Get Campaigns
 router.get('/campaigns', authenticate, metaController.getCampaigns);
 
+// Create Campaign on Facebook
+router.post('/campaigns/create', authenticate, metaController.createCampaign);
+
+// Sync real data from Facebook
+router.post('/sync', authenticate, metaController.syncFromFacebook);
+
 // Webhook for Meta Leads (no auth - Meta will call this)
 router.post('/webhook/lead', validate(webhookLeadDto), metaController.webhookLead);
 
