@@ -21,6 +21,17 @@ class TaskController {
     }
   }
 
+  // ✅ Fetch tasks due today or a specific date
+  async getTodayTasks(req, res) {
+    try {
+      const date = req.query.date; // Optional: YYYY-MM-DD
+      const tasks = await taskService.getTasksByDueDate(date);
+      return successResponse(res, tasks, 'Tasks fetched successfully');
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
   async getById(req, res) {
     try {
       const task = await taskService.getTaskById(req.params.id);

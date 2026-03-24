@@ -1,6 +1,6 @@
 import Task from '../models/task.model.js';
 import User from '../../user/models/user.model.js';
-
+import { Op } from 'sequelize';
 class TaskService {
   async createTask(taskData) {
     return await Task.create(taskData);
@@ -20,6 +20,31 @@ class TaskService {
       ]
     });
   }
+
+// ✅ Fetch tasks by due date (today or specific date)
+async getTasksByDueDate(date) {
+  // If no date is provided, use today's date automatically
+  const targetDate = date ? new Date(date) : new Date();
+
+  const startOfDay = new Date(targetDate);
+  startOfDay.setHours(0, 0, 0, 0); // 00:00:00
+
+  const endOfDay = new Date(targetDate);
+  endOfDay.setHours(23, 59, 59, 999); // 23:59:59
+
+  return await Task.findAll({
+    where: {
+      due_date: {
+        [Op.between]: [startOfDay, endOfDay],
+      }
+    },
+    include: [
+      { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+      { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+    ]
+  });
+}
+
 
   async getTaskById(id) {
     return await Task.findByPk(id, {
