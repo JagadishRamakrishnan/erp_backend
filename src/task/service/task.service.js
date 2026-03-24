@@ -44,18 +44,16 @@ class TaskService {
   }
 
     // ✅ Get today's tasks
-async getTodayTasks(userId) {
-  const now = new Date();
-
-  const startOfDay = new Date(now);
+async getTasksByDueDate(userId, due_date) {
+  // Convert string to Date objects for start/end of that day
+  const startOfDay = new Date(due_date);
   startOfDay.setUTCHours(0, 0, 0, 0);
 
-  const endOfDay = new Date(now);
+  const endOfDay = new Date(due_date);
   endOfDay.setUTCHours(23, 59, 59, 999);
 
   const where = {
     due_date: {
-      [Op.ne]: null,
       [Op.between]: [startOfDay, endOfDay]
     }
   };
@@ -70,7 +68,7 @@ async getTodayTasks(userId) {
       { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
       { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
     ],
-    order: [['due_date', 'ASC']] // 🔥 nice UX improvement
+    order: [['due_date', 'ASC']]
   });
 }
 }
