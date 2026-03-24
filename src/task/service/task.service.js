@@ -21,25 +21,29 @@ class TaskService {
     });
   }
 
-  // ✅ New function to fetch today's tasks
-  async getTasksByDueDate(date) {
-    // If no date provided, use today's date
-    const targetDate = date ? new Date(date) : new Date();
-    const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+// ✅ Fetch tasks by due date (today or specific date)
+async getTasksByDueDate(date) {
+  // If no date is provided, use today's date automatically
+  const targetDate = date ? new Date(date) : new Date();
 
-    return await Task.findAll({
-      where: {
-        due_date: {
-          [Op.between]: [startOfDay, endOfDay],
-        }
-      },
-      include: [
-        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
-      ]
-    });
-  }
+  const startOfDay = new Date(targetDate);
+  startOfDay.setHours(0, 0, 0, 0); // 00:00:00
+
+  const endOfDay = new Date(targetDate);
+  endOfDay.setHours(23, 59, 59, 999); // 23:59:59
+
+  return await Task.findAll({
+    where: {
+      due_date: {
+        [Op.between]: [startOfDay, endOfDay],
+      }
+    },
+    include: [
+      { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+      { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+    ]
+  });
+}
 
 
   async getTaskById(id) {
