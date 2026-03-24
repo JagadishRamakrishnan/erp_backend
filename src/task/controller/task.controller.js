@@ -50,6 +50,17 @@ class TaskController {
       return errorResponse(res, error.message);
     }
   }
+
+async getTodayTasks(req, res) {
+  try {
+    const userId = req.user?.id; // safer
+    const tasks = await taskService.getTodayTasks(userId);
+
+    return successResponse(res, tasks, "Today's tasks fetched successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+}
 }
 
 export default new TaskController();
