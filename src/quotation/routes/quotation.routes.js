@@ -7,6 +7,7 @@ import { createQuotationDto, updateQuotationDto } from '../dto/quotation.dto.js'
 
 router.post('/', authenticate, validate(createQuotationDto), quotationController.create);
 router.get('/', authenticate, quotationController.getAll);
+router.get('/template/download', quotationController.downloadTemplate);
 router.get('/:id', authenticate, quotationController.getById);
 router.put('/:id', authenticate, validate(updateQuotationDto), quotationController.update);
 router.delete('/:id', authenticate, quotationController.delete);

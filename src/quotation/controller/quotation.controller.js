@@ -1,6 +1,7 @@
 import quotationService from '../service/quotation.service.js';
 import { successResponse, errorResponse } from '../../../responseHelper.js';
-
+ import XLSX from "xlsx";
+ 
 class QuotationController {
   async create(req, res) {
     try {
@@ -50,6 +51,41 @@ class QuotationController {
       return errorResponse(res, error.message);
     }
   }
+ 
+
+async downloadTemplate(req, res) {
+  try {
+    const data = [
+      {
+        customer_id: "",
+        deal_id: "",
+        total_amount: "",
+        tax_amount: "",
+        status: ""
+      }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Quotes");
+
+    const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=quotes_template.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.send(buffer);
+  } catch (error) {
+    return errorResponse(res, "Failed to download template");
+  }
 }
+}
+
 
 export default new QuotationController();
