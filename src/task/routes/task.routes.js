@@ -7,7 +7,7 @@ import { createTaskDto, updateTaskDto } from '../dto/task.dto.js';
 
 router.post('/', authenticate, validate(createTaskDto), taskController.create);
 router.get('/', authenticate, taskController.getAll);
-router.get('/tasks/today', authenticate, taskController.getTodayTasks);
+router.get('/today', authenticate, taskController.getTodayTasks);
 router.get('/:id', authenticate, taskController.getById);
 router.put('/:id', authenticate, validate(updateTaskDto), taskController.update);
 router.delete('/:id', authenticate, taskController.delete);
