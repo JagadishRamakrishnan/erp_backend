@@ -43,34 +43,35 @@ class TaskService {
     return true;
   }
 
-    // ✅ Get today's tasks
-async getTasksByDueDate(userId, due_date) {
-  // Convert string to Date objects for start/end of that day
-  const startOfDay = new Date(due_date);
-  startOfDay.setUTCHours(0, 0, 0, 0);
+ // ✅ Get today's tasks with proper timezone handling
+  async getTasksByDueDate(userId, due_date) {
+    if (!due_date) throw new Error("due_date is required");
 
-  const endOfDay = new Date(due_date);
-  endOfDay.setUTCHours(23, 59, 59, 999);
+    // Convert input string 'YYYY-MM-DD' to start/end of day in **local timezone**
+    const startOfDay = new Date(due_date + 'T00:00:00');
+    const endOfDay = new Date(due_date + 'T23:59:59.999');
 
-  const where = {
-    due_date: {
-      [Op.between]: [startOfDay, endOfDay]
+    // Convert to UTC for database comparison
+    const startUTC = new Date(startOfDay.getTime() - startOfDay.getTimezoneOffset() * 60000);
+    const endUTC = new Date(endOfDay.getTime() - endOfDay.getTimezoneOffset() * 60000);
+
+    const where = {
+      due_date: { [Op.between]: [startUTC, endUTC] }
+    };
+
+    if (userId) {
+      where.assigned_to = userId;
     }
-  };
 
-  if (userId) {
-    where.assigned_to = userId;
+    return await Task.findAll({
+      where,
+      include: [
+        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+      ],
+      order: [['due_date', 'ASC']]
+    });
   }
-
-  return await Task.findAll({
-    where,
-    include: [
-      { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
-      { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
-    ],
-    order: [['due_date', 'ASC']]
-  });
-}
 }
 
 export default new TaskService();
