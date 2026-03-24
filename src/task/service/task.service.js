@@ -21,6 +21,42 @@ class TaskService {
     });
   }
 
+// ✅ Fetch tasks by a specific due date (YYYY-MM-DD)
+  async getTasksByDueDate(due_date) {
+    const startOfDay = new Date(due_date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(due_date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await Task.findAll({
+      where: { due_date: { [Op.between]: [startOfDay, endOfDay] } },
+      include: [
+        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+      ]
+    });
+  }
+
+  // ✅ Fetch tasks due today
+  async getTodaysTasks() {
+    const today = new Date();
+    const startOfDay = new Date(today);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(today);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await Task.findAll({
+      where: { due_date: { [Op.between]: [startOfDay, endOfDay] } },
+      include: [
+        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+      ]
+    });
+  }
+
+
   async getTaskById(id) {
     return await Task.findByPk(id, {
       include: [
@@ -41,31 +77,6 @@ class TaskService {
     if (!task) return null;
     await task.destroy();
     return true;
-  }
-
-  // ✅ Get tasks by due date
-  async getTasksByDueDate(userId, due_date) {
-    if (!due_date) throw new Error("due_date is required");
-
-    // Start and end of the day in local timezone
-    const startOfDay = new Date(due_date + 'T00:00:00');
-    const endOfDay = new Date(due_date + 'T23:59:59.999');
-
-    // Convert to UTC for database comparison
-    const startUTC = new Date(startOfDay.getTime() - startOfDay.getTimezoneOffset() * 60000);
-    const endUTC = new Date(endOfDay.getTime() - endOfDay.getTimezoneOffset() * 60000);
-
-    const where = { due_date: { [Op.between]: [startUTC, endUTC] } };
-    if (userId) where.assigned_to = userId;
-
-    return await Task.findAll({
-      where,
-      include: [
-        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
-      ],
-      order: [['due_date', 'ASC']]
-    });
   }
 }
 

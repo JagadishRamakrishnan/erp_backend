@@ -21,6 +21,27 @@ class TaskController {
     }
   }
 
+  async getTasksByDueDate(req, res) {
+    try {
+      const { due_date } = req.query;
+      if (!due_date) return errorResponse(res, 'due_date query is required', 400);
+
+      const tasks = await taskService.getTasksByDueDate(due_date);
+      return successResponse(res, tasks);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
+  async getTodaysTasks(req, res) {
+    try {
+      const tasks = await taskService.getTodaysTasks();
+      return successResponse(res, tasks);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
   async getById(req, res) {
     try {
       const task = await taskService.getTaskById(req.params.id);
@@ -46,23 +67,6 @@ class TaskController {
       const result = await taskService.deleteTask(req.params.id);
       if (!result) return errorResponse(res, 'Task not found', 404);
       return successResponse(res, null, 'Task deleted successfully');
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
-  }
-
-  // ✅ Fetch tasks by due_date
-  async getTasksByDueDate(req, res) {
-    try {
-      const userId = req.user?.id;
-      const { due_date } = req.query; // format: 'YYYY-MM-DD'
-
-      if (!due_date) {
-        return errorResponse(res, "Please provide a due_date query parameter");
-      }
-
-      const tasks = await taskService.getTasksByDueDate(userId, due_date);
-      return successResponse(res, tasks, `Tasks for ${due_date} fetched successfully`);
     } catch (error) {
       return errorResponse(res, error.message);
     }
