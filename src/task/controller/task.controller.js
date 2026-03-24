@@ -21,22 +21,10 @@ class TaskController {
     }
   }
 
-  async getTasksByDueDate(req, res) {
+  async getTodayTasks(req, res) {
     try {
-      const { due_date } = req.query;
-      if (!due_date) return errorResponse(res, 'due_date query is required', 400);
-
-      const tasks = await taskService.getTasksByDueDate(due_date);
-      return successResponse(res, tasks);
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
-  }
-
-  async getTodaysTasks(req, res) {
-    try {
-      const tasks = await taskService.getTodaysTasks();
-      return successResponse(res, tasks);
+      const tasks = await taskService.getTasksByDueDate();
+      return successResponse(res, tasks, 'Today\'s tasks fetched successfully');
     } catch (error) {
       return errorResponse(res, error.message);
     }

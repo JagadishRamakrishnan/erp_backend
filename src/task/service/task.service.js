@@ -21,34 +21,19 @@ class TaskService {
     });
   }
 
-// ✅ Fetch tasks by a specific due date (YYYY-MM-DD)
-  async getTasksByDueDate(due_date) {
-    const startOfDay = new Date(due_date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(due_date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    return await Task.findAll({
-      where: { due_date: { [Op.between]: [startOfDay, endOfDay] } },
-      include: [
-        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
-      ]
-    });
-  }
-
-  // ✅ Fetch tasks due today
-  async getTodaysTasks() {
-    const today = new Date();
-    const startOfDay = new Date(today);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(today);
-    endOfDay.setHours(23, 59, 59, 999);
+  // ✅ New function to fetch today's tasks
+  async getTasksByDueDate(date) {
+    // If no date provided, use today's date
+    const targetDate = date ? new Date(date) : new Date();
+    const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
     return await Task.findAll({
-      where: { due_date: { [Op.between]: [startOfDay, endOfDay] } },
+      where: {
+        due_date: {
+          [Op.between]: [startOfDay, endOfDay],
+        }
+      },
       include: [
         { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
         { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
