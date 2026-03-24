@@ -51,21 +51,22 @@ class TaskController {
     }
   }
 
-async getTasksByDueDate(req, res) {
-  try {
-    const userId = req.user?.id;
-    const { due_date } = req.query; // expect 'YYYY-MM-DD' format
-    if (!due_date) {
-      return errorResponse(res, "Please provide a due_date query parameter");
+  async getTasksByDueDate(req, res) {
+    try {
+      const userId = req.user?.id;
+      const { due_date } = req.query; // expect 'YYYY-MM-DD'
+
+      if (!due_date) {
+        return errorResponse(res, "Please provide a due_date query parameter");
+      }
+
+      const tasks = await taskService.getTasksByDueDate(userId, due_date);
+
+      return successResponse(res, tasks, `Tasks for ${due_date} fetched successfully`);
+    } catch (error) {
+      return errorResponse(res, error.message);
     }
-
-    const tasks = await taskService.getTasksByDueDate(userId, due_date);
-
-    return successResponse(res, tasks, `Tasks for ${due_date} fetched successfully`);
-  } catch (error) {
-    return errorResponse(res, error.message);
   }
-}
 }
 
 export default new TaskController();
