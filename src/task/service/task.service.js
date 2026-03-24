@@ -43,11 +43,11 @@ class TaskService {
     return true;
   }
 
- // ✅ Get today's tasks with proper timezone handling
+  // ✅ Get tasks by due date
   async getTasksByDueDate(userId, due_date) {
     if (!due_date) throw new Error("due_date is required");
 
-    // Convert input string 'YYYY-MM-DD' to start/end of day in **local timezone**
+    // Start and end of the day in local timezone
     const startOfDay = new Date(due_date + 'T00:00:00');
     const endOfDay = new Date(due_date + 'T23:59:59.999');
 
@@ -55,13 +55,8 @@ class TaskService {
     const startUTC = new Date(startOfDay.getTime() - startOfDay.getTimezoneOffset() * 60000);
     const endUTC = new Date(endOfDay.getTime() - endOfDay.getTimezoneOffset() * 60000);
 
-    const where = {
-      due_date: { [Op.between]: [startUTC, endUTC] }
-    };
-
-    if (userId) {
-      where.assigned_to = userId;
-    }
+    const where = { due_date: { [Op.between]: [startUTC, endUTC] } };
+    if (userId) where.assigned_to = userId;
 
     return await Task.findAll({
       where,

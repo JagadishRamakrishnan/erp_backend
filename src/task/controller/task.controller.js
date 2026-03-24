@@ -51,17 +51,17 @@ class TaskController {
     }
   }
 
+  // ✅ Fetch tasks by due_date
   async getTasksByDueDate(req, res) {
     try {
       const userId = req.user?.id;
-      const { due_date } = req.query; // expect 'YYYY-MM-DD'
+      const { due_date } = req.query; // format: 'YYYY-MM-DD'
 
       if (!due_date) {
         return errorResponse(res, "Please provide a due_date query parameter");
       }
 
       const tasks = await taskService.getTasksByDueDate(userId, due_date);
-
       return successResponse(res, tasks, `Tasks for ${due_date} fetched successfully`);
     } catch (error) {
       return errorResponse(res, error.message);
