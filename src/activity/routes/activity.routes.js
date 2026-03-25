@@ -7,6 +7,7 @@ import { createActivityDto, updateActivityDto } from '../dto/activity.dto.js';
 
 router.post('/', authenticate, validate(createActivityDto), activityController.create);
 router.get('/', authenticate, activityController.getAll);
+router.get('/today', activityController.getToday);
 router.get('/:id', authenticate, activityController.getById);
 router.put('/:id', authenticate, validate(updateActivityDto), activityController.update);
 router.delete('/:id', authenticate, activityController.delete);

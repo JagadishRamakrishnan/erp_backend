@@ -21,6 +21,15 @@ class ActivityController {
     }
   }
 
+  async getToday(req, res) {
+  try {
+    const activities = await activityService.getTodayActivities();
+    return successResponse(res, activities);
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+}
+
   async getById(req, res) {
     try {
       const activity = await activityService.getActivityById(req.params.id);

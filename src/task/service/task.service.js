@@ -21,27 +21,52 @@ class TaskService {
     });
   }
 
-// ✅ Fetch tasks by due date (today or specific date)
 async getTasksByDueDate(date) {
-  // If no date is provided, use today's date automatically
-  const targetDate = date ? new Date(date) : new Date();
+  const IST_OFFSET = 5.5 * 60 * 60 * 1000;
 
-  const startOfDay = new Date(targetDate);
-  startOfDay.setHours(0, 0, 0, 0); // 00:00:00
+  let baseDate;
 
-  const endOfDay = new Date(targetDate);
-  endOfDay.setHours(23, 59, 59, 999); // 23:59:59
+  if (date) {
+    // If user passes date (YYYY-MM-DD), treat it as IST
+    baseDate = new Date(date);
+  } else {
+    baseDate = new Date();
+  }
+
+  // Convert to IST
+  const istDate = new Date(baseDate.getTime() + IST_OFFSET);
+
+  // Start of IST day
+  const startOfDayIST = new Date(
+    istDate.getFullYear(),
+    istDate.getMonth(),
+    istDate.getDate(),
+    0, 0, 0, 0
+  );
+
+  // End of IST day
+  const endOfDayIST = new Date(
+    istDate.getFullYear(),
+    istDate.getMonth(),
+    istDate.getDate(),
+    23, 59, 59, 999
+  );
+
+  // Convert IST → UTC for DB
+  const startUTC = new Date(startOfDayIST.getTime() - IST_OFFSET);
+  const endUTC = new Date(endOfDayIST.getTime() - IST_OFFSET);
 
   return await Task.findAll({
     where: {
       due_date: {
-        [Op.between]: [startOfDay, endOfDay],
+        [Op.between]: [startUTC, endUTC],
       }
     },
     include: [
       { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
       { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
-    ]
+    ],
+    order: [['due_date', 'ASC']]
   });
 }
 
