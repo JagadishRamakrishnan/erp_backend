@@ -62,6 +62,41 @@ class TaskController {
       return errorResponse(res, error.message);
     }
   }
+  // ✅ DOWNLOAD TEMPLATE
+async downloadTemplate(req, res) {
+  try {
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=tasks_template.csv"
+    );
+
+    const csvData = `title,description,priority,status,assigned_to,due_date
+`;
+
+    res.send(csvData);
+  } catch (error) {
+    return errorResponse(res, "Failed to download template");
+  }
+}
+
+// ✅ BULK UPLOAD
+async bulkUpload(req, res) {
+  try {
+    const tasks = req.body; // expecting array
+
+    const createdTasks = await Promise.all(
+      tasks.map(task => taskService.createTask({
+        ...task,
+        created_by: req.user.id
+      }))
+    );
+
+    return successResponse(res, createdTasks, "Tasks uploaded successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+}
 }
 
 export default new TaskController();
