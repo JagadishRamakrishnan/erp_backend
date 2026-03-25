@@ -35,14 +35,14 @@ import User from './src/user/models/user.model.js';
 db.sequelize.sync({ alter: false })
   .then(async () => {
     console.log('Database connected successfully');
-    
+
     // Create default user if no users exist
     try {
       const userCount = await User.count();
-      
+
       if (userCount === 0) {
         console.log('No users found. Creating default "Atelier" user...');
-        
+
         // Password will be automatically hashed by User model's beforeCreate hook
         await User.create({
           name: 'Atelier',
@@ -52,7 +52,7 @@ db.sequelize.sync({ alter: false })
           role: 'Admin',
           status: true
         });
-        
+
         console.log('✅ Default user "Atelier" created successfully!');
         console.log('📧 Email: atelier@gmail.com');
         console.log('🔑 Password: 12345678');
@@ -62,7 +62,7 @@ db.sequelize.sync({ alter: false })
     } catch (error) {
       console.error('Error creating default user:', error.message);
     }
-    
+
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
