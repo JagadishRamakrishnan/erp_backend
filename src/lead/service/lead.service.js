@@ -16,7 +16,8 @@ class LeadService {
       where,
       include: [
         { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'summaryUpdatedBy', attributes: ['id', 'name', 'email'] }
       ]
     });
   }
@@ -25,7 +26,8 @@ class LeadService {
     return await Lead.findByPk(id, {
       include: [
         { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'summaryUpdatedBy', attributes: ['id', 'name', 'email'] }
       ]
     });
   }

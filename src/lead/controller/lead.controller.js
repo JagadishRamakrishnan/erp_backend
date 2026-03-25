@@ -35,6 +35,10 @@ class LeadController {
 
   async update(req, res) {
     try {
+      if (req.body.internal_summary !== undefined) {
+        req.body.summary_updated_at = new Date();
+        req.body.summary_updated_by = req.user.id;
+      }
       const lead = await leadService.updateLead(req.params.id, req.body);
       if (!lead) return errorResponse(res, 'Lead not found', 404);
       return successResponse(res, lead, 'Lead updated successfully');

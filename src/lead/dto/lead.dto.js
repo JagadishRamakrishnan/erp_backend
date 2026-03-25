@@ -7,7 +7,10 @@ const createLeadDto = Joi.object({
   company: Joi.string().max(150).allow('', null).optional(),
   source: Joi.string().max(100).allow('', null).optional(),
   status: Joi.string().valid('New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost').optional(),
-  assigned_to: Joi.number().allow(null).optional()
+  assigned_to: Joi.number().allow(null).optional(),
+  internal_summary: Joi.string().allow('', null).optional(),
+  summary_updated_at: Joi.date().optional(),
+  summary_updated_by: Joi.number().optional()
 });
 
 const updateLeadDto = Joi.object({
@@ -17,7 +20,10 @@ const updateLeadDto = Joi.object({
   company: Joi.string().max(150).allow('', null).optional(),
   source: Joi.string().max(100).allow('', null).optional(),
   status: Joi.string().valid('New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost').optional(),
-  assigned_to: Joi.number().allow(null).optional()
+  assigned_to: Joi.number().allow(null).optional(),
+  internal_summary: Joi.string().allow('', null).optional(),
+  summary_updated_at: Joi.date().optional(),
+  summary_updated_by: Joi.number().optional()
 });
 
 export { createLeadDto, updateLeadDto };

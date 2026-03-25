@@ -15,6 +15,7 @@ import Company from '../company/models/company.model.js';
 // User associations
 User.hasMany(Lead, { foreignKey: 'assigned_to', as: 'assignedLeads' });
 User.hasMany(Lead, { foreignKey: 'created_by', as: 'createdLeads' });
+User.hasMany(Lead, { foreignKey: 'summary_updated_by', as: 'summaryUpdatedLeads' });
 User.hasMany(Customer, { foreignKey: 'created_by', as: 'createdCustomers' });
 User.hasMany(Deal, { foreignKey: 'assigned_to', as: 'assignedDeals' });
 User.hasMany(Task, { foreignKey: 'assigned_to', as: 'assignedTasks' });
@@ -26,6 +27,7 @@ User.hasMany(Note, { foreignKey: 'created_by', as: 'notes' });
 // Lead associations
 Lead.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
 Lead.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+Lead.belongsTo(User, { foreignKey: 'summary_updated_by', as: 'summaryUpdatedBy' });
 Lead.hasMany(Customer, { foreignKey: 'created_from_lead', as: 'customers' });
 Lead.hasMany(Deal, { foreignKey: 'lead_id', as: 'deals' });
 

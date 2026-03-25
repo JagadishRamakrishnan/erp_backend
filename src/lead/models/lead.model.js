@@ -54,6 +54,22 @@ const Lead = db.sequelize.define('Lead', {
       model: 'users',
       key: 'id'
     }
+  },
+  internal_summary: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  summary_updated_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  summary_updated_by: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'leads',
