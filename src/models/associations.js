@@ -10,6 +10,7 @@ import Invoice from '../invoice/models/invoice.model.js';
 import Payment from '../payment/models/payment.model.js';
 import Ticket from '../ticket/models/ticket.model.js';
 import Note from '../note/models/note.model.js';
+import Company from '../company/models/company.model.js';
 
 // User associations
 User.hasMany(Lead, { foreignKey: 'assigned_to', as: 'assignedLeads' });
@@ -76,6 +77,10 @@ Ticket.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
 // Note associations
 Note.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
+// Company associations
+Company.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+User.hasMany(Company, { foreignKey: 'created_by', as: 'companies' });
+
 // Meta Ads Models
 import MetaAccount from '../meta/models/metaAccount.model.js';
 import AdAccount from '../meta/models/adAccount.model.js';
@@ -135,6 +140,7 @@ export {
   Payment,
   Ticket,
   Note,
+  Company,
   MetaAccount,
   AdAccount,
   Campaign,
