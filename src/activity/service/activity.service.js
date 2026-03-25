@@ -1,6 +1,6 @@
 import Activity from '../models/activity.model.js';
 import User from '../../user/models/user.model.js';
-
+import { Op } from 'sequelize';
 class ActivityService {
   async createActivity(activityData) {
     return await Activity.create(activityData);
@@ -14,6 +14,27 @@ class ActivityService {
 
     return await Activity.findAll({
       where,
+      include: [
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
+      ],
+      order: [['activity_date', 'DESC']]
+    });
+  }
+
+   // ✅ NEW: Get Today's Activities (Automatic)
+  async getTodayActivities() {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await Activity.findAll({
+      where: {
+        activity_date: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      },
       include: [
         { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
       ],

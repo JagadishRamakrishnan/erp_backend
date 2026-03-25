@@ -25,6 +25,7 @@ class TaskController {
   async getTodayTasks(req, res) {
     try {
       const date = req.query.date; // Optional: YYYY-MM-DD
+      console.log(date)
       const tasks = await taskService.getTasksByDueDate(date);
       return successResponse(res, tasks, 'Tasks fetched successfully');
     } catch (error) {
