@@ -23,7 +23,8 @@ const updateLeadDto = Joi.object({
   assigned_to: Joi.number().allow(null).optional(),
   internal_summary: Joi.string().allow('', null).optional(),
   summary_updated_at: Joi.date().optional(),
-  summary_updated_by: Joi.number().optional()
+  summary_updated_by: Joi.number().optional(),
+  last_outcome: Joi.string().max(100).allow('', null).optional()
 });
 
 export { createLeadDto, updateLeadDto };

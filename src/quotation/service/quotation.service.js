@@ -2,7 +2,10 @@ import Quotation from '../models/quotation.model.js';
 import QuotationItem from '../models/quotationItem.model.js';
 import Customer from '../../customer/models/customer.model.js';
 import Deal from '../../deal/models/deal.model.js';
+import Lead from '../../lead/models/lead.model.js';
 import User from '../../user/models/user.model.js';
+import Note from '../../note/models/note.model.js';
+import Activity from '../../activity/models/activity.model.js';
 
 class QuotationService {
   async createQuotation(quotationData) {
@@ -53,9 +56,64 @@ class QuotationService {
   }
 
   async updateQuotation(id, quotationData) {
-    const quotation = await Quotation.findByPk(id);
+    const quotation = await Quotation.findByPk(id, {
+      include: [{ model: Customer, as: 'customer' }]
+    });
     if (!quotation) return null;
-    return await quotation.update(quotationData);
+
+    const oldStatus = quotation.status;
+    const updated = await quotation.update(quotationData);
+
+    // Automation: If status changes to Approved, handle Lead and Deal
+    if (quotationData.status === 'Approved' && oldStatus !== 'Approved') {
+      try {
+        const customer = quotation.customer;
+        if (customer && customer.created_from_lead) {
+          const leadId = customer.created_from_lead;
+          
+          // 1. Mark Lead as Won
+          await Lead.update({ status: 'Won' }, { where: { id: leadId } });
+
+          // 2. Create Deal if it doesn't exist for this quotation
+          if (!quotation.deal_id) {
+            const deal = await Deal.create({
+              deal_name: `Deal for ${customer.name} - ${quotation.quotation_number}`,
+              customer_id: customer.id,
+              lead_id: leadId,
+              value: quotation.total_amount,
+              stage: 'Won',
+              probability: 100,
+              assigned_to: quotation.created_by
+            });
+
+            // Link the deal back to the quotation
+            await updated.update({ deal_id: deal.id });
+
+            // 3. Create Note for Lead
+            await Note.create({
+              related_type: 'Lead',
+              related_id: leadId,
+              note: `Quotation Approved: ${quotation.quotation_number}. Auto-converted to Won.`,
+              created_by: quotation.created_by
+            });
+
+            // 4. Create Activity for Lead
+            await Activity.create({
+              type: 'Stage Change',
+              related_type: 'Lead',
+              related_id: leadId,
+              notes: `Quotation #${quotation.quotation_number} was approved. Lead moved to Won.`,
+              activity_date: new Date().toISOString(),
+              created_by: quotation.created_by
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to automate lead/deal update on quote approval:', err);
+      }
+    }
+
+    return await this.getQuotationById(id);
   }
 
   async deleteQuotation(id) {

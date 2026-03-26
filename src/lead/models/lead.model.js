@@ -70,6 +70,10 @@ const Lead = db.sequelize.define('Lead', {
       model: 'users',
       key: 'id'
     }
+  },
+  last_outcome: {
+    type: DataTypes.STRING(100),
+    allowNull: true
   }
 }, {
   tableName: 'leads',

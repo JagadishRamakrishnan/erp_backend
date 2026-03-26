@@ -27,6 +27,10 @@ const Activity = db.sequelize.define('Activity', {
     type: DataTypes.DATE,
     allowNull: false
   },
+  scheduled_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   created_by: {
     type: DataTypes.BIGINT,
     allowNull: true,
