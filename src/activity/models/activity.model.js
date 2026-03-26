@@ -8,7 +8,7 @@ const Activity = db.sequelize.define('Activity', {
     autoIncrement: true
   },
   type: {
-    type: DataTypes.ENUM('Call', 'Email', 'Meeting', 'WhatsApp'),
+    type: DataTypes.ENUM('Call', 'Email', 'Meeting', 'WhatsApp', 'Stage Change', 'Note', 'Task'),
     allowNull: false
   },
   related_type: {
