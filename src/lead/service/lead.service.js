@@ -52,8 +52,9 @@ class LeadService {
       return { alreadyConverted: true, lead };
     }
     
-    // Import Customer model
+    // Import models
     const Customer = (await import('../../customer/models/customer.model.js')).default;
+    const Deal = (await import('../../deal/models/deal.model.js')).default;
     
     // Generate customer code
     const customerCode = `CUST-${Date.now()}`;
@@ -68,11 +69,24 @@ class LeadService {
       created_from_lead: lead.id,
       created_by: lead.created_by
     });
+
+    // Automatically create a Deal for this won lead
+    const deal = await Deal.create({
+      deal_name: `${lead.name} - Initial Deal`,
+      customer_id: customer.id,
+      lead_id: lead.id,
+      value: 0, // Default value, can be updated by sales rep
+      probability: 100,
+      stage: 'Closed Won',
+      assigned_to: lead.assigned_to,
+      source: lead.source,
+      description: `Automatically created from lead conversion of ${lead.name}`
+    });
     
     // Update lead status to Won
     await lead.update({ status: 'Won' });
     
-    return { lead, customer };
+    return { lead, customer, deal };
   }
 }
 

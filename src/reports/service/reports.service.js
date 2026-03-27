@@ -31,12 +31,12 @@ class ReportsService {
   async getKPIMetrics() {
     // Win Rate
     const totalDeals = await Deal.count();
-    const wonDeals = await Deal.count({ where: { stage: 'Won' } });
+    const wonDeals = await Deal.count({ where: { stage: 'Closed Won' } });
     const winRate = totalDeals > 0 ? ((wonDeals / totalDeals) * 100).toFixed(0) : 0;
 
     // Average Deal Size
     const wonDealsData = await Deal.findAll({
-      where: { stage: 'Won' },
+      where: { stage: 'Closed Won' },
       attributes: ['value']
     });
     const totalValue = wonDealsData.reduce((sum, deal) => sum + parseFloat(deal.value || 0), 0);
@@ -46,7 +46,7 @@ class ReportsService {
     const salesCycleResult = await db.sequelize.query(`
       SELECT AVG(DATEDIFF(updated_at, created_at)) as avg_days
       FROM deals
-      WHERE stage = 'Won'
+      WHERE stage = 'Closed Won'
     `, {
       type: db.Sequelize.QueryTypes.SELECT
     });
@@ -131,7 +131,7 @@ class ReportsService {
 
       const dealsCount = await Deal.count({
         where: {
-          stage: 'Won',
+          stage: 'Closed Won',
           updated_at: {
             [db.Sequelize.Op.between]: [startDate, endDate]
           }
@@ -161,7 +161,7 @@ class ReportsService {
         COUNT(d.id) as deals_closed,
         SUM(d.value) as total_value
       FROM users u
-      LEFT JOIN deals d ON u.id = d.assigned_to AND d.stage = 'Won' 
+      LEFT JOIN deals d ON u.id = d.assigned_to AND d.stage = 'Closed Won' 
         AND d.updated_at BETWEEN :startDate AND :endDate
       WHERE u.role IN ('Sales', 'Admin')
       GROUP BY u.id, u.name, u.email
