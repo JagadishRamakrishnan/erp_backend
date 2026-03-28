@@ -13,6 +13,16 @@ class QuotationController {
     }
   }
 
+  async createFromService(req, res) {
+    try {
+      const { serviceId, customerId, dealId } = req.body;
+      const quotation = await quotationService.createFromService(serviceId, customerId, dealId, req.user.id);
+      return successResponse(res, quotation, 'Quotation generated from service template', 201);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
   async getAll(req, res) {
     try {
       const quotations = await quotationService.getAllQuotations(req.query);

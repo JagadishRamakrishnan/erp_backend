@@ -2,6 +2,7 @@ import Deal from '../models/deal.model.js';
 import Customer from '../../customer/models/customer.model.js';
 import Lead from '../../lead/models/lead.model.js';
 import User from '../../user/models/user.model.js';
+import ServiceCatalog from '../../service_catalog/models/service_catalog.model.js';
 
 class DealService {
   async createDeal(dealData) {
@@ -18,7 +19,8 @@ class DealService {
       include: [
         { model: Customer, as: 'customer', attributes: ['id', 'customer_code', 'name'] },
         { model: Lead, as: 'lead', attributes: ['id', 'lead_code', 'name'] },
-        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] }
+        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+        { model: ServiceCatalog, as: 'service', attributes: ['id', 'name', 'category', 'unit_price'] }
       ]
     });
   }
@@ -28,7 +30,8 @@ class DealService {
       include: [
         { model: Customer, as: 'customer', attributes: ['id', 'customer_code', 'name'] },
         { model: Lead, as: 'lead', attributes: ['id', 'lead_code', 'name'] },
-        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] }
+        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
+        { model: ServiceCatalog, as: 'service', attributes: ['id', 'name', 'category', 'unit_price'] }
       ]
     });
   }

@@ -123,6 +123,47 @@ class QuotationService {
     await quotation.destroy();
     return true;
   }
+
+  // Phase 2: Create a quotation pre-filled from a Service Catalog template
+  async createFromService(serviceId, customerId, dealId, createdBy) {
+    const ServiceCatalog = (await import('../../service_catalog/models/service_catalog.model.js')).default;
+    const ServiceLineItem = (await import('../../service_catalog/models/service_line_item.model.js')).default;
+
+    const service = await ServiceCatalog.findByPk(serviceId, {
+      include: [{ model: ServiceLineItem, as: 'lineItems' }]
+    });
+    if (!service) throw new Error('Service not found');
+
+    // Build quotation items from service line items
+    const items = service.lineItems && service.lineItems.length > 0
+      ? service.lineItems.map(item => ({
+          product_name: item.item_name,
+          quantity: parseFloat(item.qty) || 1,
+          price: parseFloat(item.unit_price) || 0,
+          total: (parseFloat(item.qty) || 1) * (parseFloat(item.unit_price) || 0)
+        }))
+      : [{
+          product_name: service.name,
+          quantity: 1,
+          price: parseFloat(service.unit_price) || 0,
+          total: parseFloat(service.unit_price) || 0
+        }];
+
+    // Calculate totals
+    const subtotal = items.reduce((sum, item) => sum + parseFloat(item.total), 0);
+    const taxAmount = (subtotal * (parseFloat(service.tax_percent) || 0)) / 100;
+    const totalAmount = subtotal + taxAmount;
+
+    return await this.createQuotation({
+      customer_id: customerId,
+      deal_id: dealId || null,
+      total_amount: totalAmount,
+      tax_amount: taxAmount,
+      status: 'Draft',
+      created_by: createdBy,
+      items
+    });
+  }
 }
 
 export default new QuotationService();

@@ -94,6 +94,14 @@ const Deal = db.sequelize.define('Deal', {
   loss_reason: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  service_id: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'service_catalog',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'deals',

@@ -11,6 +11,16 @@ class InvoiceController {
     }
   }
 
+  async createFromQuotation(req, res) {
+    try {
+      const { quotationId } = req.body;
+      const invoice = await invoiceService.createFromQuotation(quotationId, req.user.id);
+      return successResponse(res, invoice, 'Invoice generated from quotation', 201);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
   async getAll(req, res) {
     try {
       const invoices = await invoiceService.getAllInvoices(req.query);

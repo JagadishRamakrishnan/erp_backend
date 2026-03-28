@@ -68,6 +68,28 @@ class InvoiceService {
     await invoice.destroy();
     return true;
   }
+
+  async createFromQuotation(quotationId, createdBy) {
+    const QuotationService = (await import('../../quotation/service/quotation.service.js')).default;
+    const quotation = await QuotationService.getQuotationById(quotationId);
+    if (!quotation) throw new Error('Quotation not found');
+
+    const invoiceData = {
+      customer_id: quotation.customer_id,
+      deal_id: quotation.deal_id,
+      quotation_id: quotation.id,
+      total_amount: quotation.total_amount,
+      tax_amount: quotation.tax_amount,
+      status: 'Unpaid',
+      paid_amount: 0,
+      due_amount: quotation.total_amount,
+      invoice_date: new Date(),
+      due_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // Default 15 days
+      created_by: createdBy
+    };
+
+    return await this.createInvoice(invoiceData);
+  }
 }
 
 export default new InvoiceService();

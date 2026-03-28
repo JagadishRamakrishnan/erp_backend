@@ -6,6 +6,7 @@ import validate from '../../middleware/validate.js';
 import { createQuotationDto, updateQuotationDto } from '../dto/quotation.dto.js';
 
 router.post('/', authenticate, validate(createQuotationDto), quotationController.create);
+router.post('/generate-from-template', authenticate, quotationController.createFromService);
 router.get('/', authenticate, quotationController.getAll);
 router.get('/template/download', quotationController.downloadTemplate);
 router.get('/:id', authenticate, quotationController.getById);

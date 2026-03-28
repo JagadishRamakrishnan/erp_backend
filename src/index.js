@@ -19,6 +19,7 @@ import whatsappRoutes from './whatsapp/routes/whatsapp.routes.js';
 import companyRoutes from './company/routes/company.routes.js';
 import dashboardRoutes from './dashboard/routes/dashboard.routes.js';
 import reportsRoutes from './reports/routes/reports.routes.js';
+import serviceCatalogRoutes from './service_catalog/routes/service_catalog.routes.js';
 
 // Use routes
 router.use('/users', userRoutes);
@@ -37,5 +38,6 @@ router.use('/whatsapp', whatsappRoutes);
 router.use('/companies', companyRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportsRoutes);
+router.use('/services', serviceCatalogRoutes);
 
 export default router;

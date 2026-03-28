@@ -8,6 +8,8 @@ const createLeadDto = Joi.object({
   source: Joi.string().max(100).allow('', null).optional(),
   status: Joi.string().valid('New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost').optional(),
   assigned_to: Joi.number().allow(null).optional(),
+  service_id: Joi.number().allow(null).optional(),
+  service_ids: Joi.array().items(Joi.number()).allow(null).optional(),
   internal_summary: Joi.string().allow('', null).optional(),
   summary_updated_at: Joi.date().optional(),
   summary_updated_by: Joi.number().optional()
@@ -21,6 +23,8 @@ const updateLeadDto = Joi.object({
   source: Joi.string().max(100).allow('', null).optional(),
   status: Joi.string().valid('New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost').optional(),
   assigned_to: Joi.number().allow(null).optional(),
+  service_id: Joi.number().allow(null).optional(),
+  service_ids: Joi.array().items(Joi.number()).allow(null).optional(),
   internal_summary: Joi.string().allow('', null).optional(),
   summary_updated_at: Joi.date().optional(),
   summary_updated_by: Joi.number().optional(),

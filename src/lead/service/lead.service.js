@@ -1,10 +1,20 @@
 import Lead from '../models/lead.model.js';
 import User from '../../user/models/user.model.js';
+import ServiceCatalog from '../../service_catalog/models/service_catalog.model.js';
+import ServiceLineItem from '../../service_catalog/models/service_line_item.model.js';
 
 class LeadService {
   async createLead(leadData) {
+    const { service_ids, ...data } = leadData;
     const leadCode = `LEAD-${Date.now()}`;
-    return await Lead.create({ ...leadData, lead_code: leadCode });
+    const lead = await Lead.create({ ...data, lead_code: leadCode });
+    
+    if (service_ids && Array.isArray(service_ids)) {
+      const ids = service_ids.map(id => parseInt(id)).filter(id => !isNaN(id));
+      if (ids.length > 0) await lead.setInterestedServices(ids);
+    }
+    
+    return await this.getLeadById(lead.id);
   }
 
   async getAllLeads(filters = {}) {
@@ -17,7 +27,14 @@ class LeadService {
       include: [
         { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
         { model: User, as: 'creator', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'summaryUpdatedBy', attributes: ['id', 'name', 'email'] }
+        { model: User, as: 'summaryUpdatedBy', attributes: ['id', 'name', 'email'] },
+        { model: ServiceCatalog, as: 'service', attributes: ['id', 'name', 'category', 'unit_price'] },
+        { 
+          model: ServiceCatalog, 
+          as: 'interestedServices', 
+          attributes: ['id', 'name', 'category', 'description', 'unit_price', 'tax_percent'],
+          include: [{ model: ServiceLineItem, as: 'lineItems' }]
+        }
       ]
     });
   }
@@ -27,15 +44,31 @@ class LeadService {
       include: [
         { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] },
         { model: User, as: 'creator', attributes: ['id', 'name', 'email'] },
-        { model: User, as: 'summaryUpdatedBy', attributes: ['id', 'name', 'email'] }
+        { model: User, as: 'summaryUpdatedBy', attributes: ['id', 'name', 'email'] },
+        { model: ServiceCatalog, as: 'service', attributes: ['id', 'name', 'category', 'unit_price'] },
+        { 
+          model: ServiceCatalog, 
+          as: 'interestedServices', 
+          attributes: ['id', 'name', 'category', 'description', 'unit_price', 'tax_percent'],
+          include: [{ model: ServiceLineItem, as: 'lineItems' }]
+        }
       ]
     });
   }
 
   async updateLead(id, leadData) {
+    const { service_ids, ...data } = leadData;
     const lead = await Lead.findByPk(id);
     if (!lead) return null;
-    return await lead.update(leadData);
+    
+    await lead.update(data);
+    
+    if (service_ids !== undefined && Array.isArray(service_ids)) {
+      const ids = service_ids.map(id => parseInt(id)).filter(id => !isNaN(id));
+      await lead.setInterestedServices(ids);
+    }
+    
+    return await this.getLeadById(id);
   }
 
   async deleteLead(id) {

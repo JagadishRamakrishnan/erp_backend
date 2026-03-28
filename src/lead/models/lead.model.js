@@ -74,6 +74,14 @@ const Lead = db.sequelize.define('Lead', {
   last_outcome: {
     type: DataTypes.STRING(100),
     allowNull: true
+  },
+  service_id: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'service_catalog',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'leads',

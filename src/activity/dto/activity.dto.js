@@ -5,7 +5,9 @@ const createActivityDto = Joi.object({
   related_type: Joi.string().valid('Lead', 'Customer', 'Deal').allow('', null).optional(),
   related_id: Joi.number().allow(null).optional(),
   notes: Joi.string().allow('', null).optional(),
-  activity_date: Joi.date().required()
+  activity_date: Joi.date().required(),
+  scheduled_at: Joi.date().allow(null).optional(),
+  created_by: Joi.number().optional()
 });
 
 const updateActivityDto = Joi.object({
@@ -13,7 +15,9 @@ const updateActivityDto = Joi.object({
   related_type: Joi.string().valid('Lead', 'Customer', 'Deal').allow('', null).optional(),
   related_id: Joi.number().allow(null).optional(),
   notes: Joi.string().allow('', null).optional(),
-  activity_date: Joi.date().optional()
+  activity_date: Joi.date().optional(),
+  scheduled_at: Joi.date().allow(null).optional(),
+  created_by: Joi.number().optional()
 });
 
 export { createActivityDto, updateActivityDto };

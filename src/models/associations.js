@@ -11,6 +11,9 @@ import Payment from '../payment/models/payment.model.js';
 import Ticket from '../ticket/models/ticket.model.js';
 import Note from '../note/models/note.model.js';
 import Company from '../company/models/company.model.js';
+import ServiceCatalog from '../service_catalog/models/service_catalog.model.js';
+import ServiceLineItem from '../service_catalog/models/service_line_item.model.js';
+import LeadServices from '../lead/models/lead_services.model.js';
 
 // User associations
 User.hasMany(Lead, { foreignKey: 'assigned_to', as: 'assignedLeads' });
@@ -30,6 +33,8 @@ Lead.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 Lead.belongsTo(User, { foreignKey: 'summary_updated_by', as: 'summaryUpdatedBy' });
 Lead.hasMany(Customer, { foreignKey: 'created_from_lead', as: 'customers' });
 Lead.hasMany(Deal, { foreignKey: 'lead_id', as: 'deals' });
+Lead.belongsTo(ServiceCatalog, { foreignKey: 'service_id', as: 'service' });
+Lead.belongsToMany(ServiceCatalog, { through: LeadServices, foreignKey: 'lead_id', otherKey: 'service_id', as: 'interestedServices' });
 
 // Customer associations
 Customer.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
@@ -45,6 +50,15 @@ Deal.belongsTo(Lead, { foreignKey: 'lead_id', as: 'lead' });
 Deal.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
 Deal.hasMany(Quotation, { foreignKey: 'deal_id', as: 'quotations' });
 Deal.hasMany(Invoice, { foreignKey: 'deal_id', as: 'invoices' });
+Deal.belongsTo(ServiceCatalog, { foreignKey: 'service_id', as: 'service' });
+
+// ServiceCatalog associations
+ServiceCatalog.hasMany(ServiceLineItem, { foreignKey: 'service_id', as: 'lineItems' });
+ServiceCatalog.hasMany(Lead, { foreignKey: 'service_id', as: 'leads_single' }); 
+ServiceCatalog.belongsToMany(Lead, { through: LeadServices, foreignKey: 'service_id', otherKey: 'lead_id', as: 'leads' });
+ServiceCatalog.hasMany(Deal, { foreignKey: 'service_id', as: 'deals' });
+ServiceCatalog.belongsTo(User, { foreignKey: 'created_by', as: 'createdBy' });
+ServiceLineItem.belongsTo(ServiceCatalog, { foreignKey: 'service_id', as: 'service' });
 
 // Task associations
 Task.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
@@ -143,6 +157,8 @@ export {
   Ticket,
   Note,
   Company,
+  ServiceCatalog,
+  ServiceLineItem,
   MetaAccount,
   AdAccount,
   Campaign,
