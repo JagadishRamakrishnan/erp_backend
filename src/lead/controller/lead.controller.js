@@ -7,7 +7,7 @@ class LeadController {
   async create(req, res) {
     try {
       req.body.created_by = req.user.id;
-      const lead = await leadService.createLead(req.body);
+      const lead = await leadService.createLead(req.body, req);
       return successResponse(res, lead, 'Lead created successfully', 201);
     } catch (error) {
       return errorResponse(res, error.message);
@@ -39,7 +39,7 @@ class LeadController {
         req.body.summary_updated_at = new Date();
         req.body.summary_updated_by = req.user.id;
       }
-      const lead = await leadService.updateLead(req.params.id, req.body);
+      const lead = await leadService.updateLead(req.params.id, req.body, req);
       if (!lead) return errorResponse(res, 'Lead not found', 404);
       return successResponse(res, lead, 'Lead updated successfully');
     } catch (error) {

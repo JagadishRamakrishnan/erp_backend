@@ -51,6 +51,22 @@ const Invoice = db.sequelize.define('Invoice', {
   status: {
     type: DataTypes.ENUM('Pending', 'Partial', 'Paid'),
     defaultValue: 'Pending'
+  },
+  is_recurring: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  recurring_interval: {
+    type: DataTypes.ENUM('Monthly', 'Quarterly', 'Yearly'),
+    allowNull: true
+  },
+  next_billing_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  last_reminder_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'invoices',

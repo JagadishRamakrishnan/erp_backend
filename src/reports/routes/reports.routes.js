@@ -6,5 +6,6 @@ const router = express.Router();
 
 // Get Reports Data
 router.get('/', authenticate, reportsController.getReports);
+router.get('/export', authenticate, reportsController.export);
 
 export default router;

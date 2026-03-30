@@ -32,7 +32,7 @@ await import('./src/models/associations.js');
 import User from './src/user/models/user.model.js';
 
 // Database sync and server start
-db.sequelize.sync({ alter: true })
+db.sequelize.sync()
   .then(async () => {
     console.log('Database connected successfully');
 

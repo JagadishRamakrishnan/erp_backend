@@ -11,6 +11,19 @@ class ReportsController {
       return errorResponse(res, error.message);
     }
   }
+
+  async export(req, res) {
+    try {
+      const { type } = req.query;
+      const csv = await reportsService.exportData(type);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=${type}_report.csv`);
+      return res.send(csv);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
 }
 
 export default new ReportsController();

@@ -7,9 +7,13 @@ import Activity from '../activity/models/activity.model.js';
 import Quotation from '../quotation/models/quotation.model.js';
 import QuotationItem from '../quotation/models/quotationItem.model.js';
 import Invoice from '../invoice/models/invoice.model.js';
+import InvoiceItem from '../invoice/models/invoiceItem.model.js';
 import Payment from '../payment/models/payment.model.js';
 import Ticket from '../ticket/models/ticket.model.js';
+import TicketComment from '../ticket/models/ticketComment.model.js';
 import Note from '../note/models/note.model.js';
+import AuditLog from '../models/auditLog.model.js';
+import LeadAssignmentRule from '../lead/models/leadAssignmentRule.model.js';
 import Company from '../company/models/company.model.js';
 import ServiceCatalog from '../service_catalog/models/service_catalog.model.js';
 import ServiceLineItem from '../service_catalog/models/service_line_item.model.js';
@@ -25,7 +29,10 @@ User.hasMany(Task, { foreignKey: 'assigned_to', as: 'assignedTasks' });
 User.hasMany(Task, { foreignKey: 'created_by', as: 'createdTasks' });
 User.hasMany(Activity, { foreignKey: 'created_by', as: 'activities' });
 User.hasMany(Ticket, { foreignKey: 'assigned_to', as: 'assignedTickets' });
+User.hasMany(TicketComment, { foreignKey: 'user_id', as: 'ticketComments' });
 User.hasMany(Note, { foreignKey: 'created_by', as: 'notes' });
+User.hasMany(AuditLog, { foreignKey: 'user_id', as: 'auditLogs' });
+User.hasMany(LeadAssignmentRule, { foreignKey: 'assign_to', as: 'assignmentRules' });
 
 // Lead associations
 Lead.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
@@ -82,6 +89,10 @@ Invoice.belongsTo(Customer, { foreignKey: 'customer_id', as: 'customer' });
 Invoice.belongsTo(Deal, { foreignKey: 'deal_id', as: 'deal' });
 Invoice.belongsTo(Quotation, { foreignKey: 'quotation_id', as: 'quotation' });
 Invoice.hasMany(Payment, { foreignKey: 'invoice_id', as: 'payments' });
+Invoice.hasMany(InvoiceItem, { foreignKey: 'invoice_id', as: 'items' });
+
+// InvoiceItem associations
+InvoiceItem.belongsTo(Invoice, { foreignKey: 'invoice_id', as: 'invoice' });
 
 // Payment associations
 Payment.belongsTo(Invoice, { foreignKey: 'invoice_id', as: 'invoice' });
@@ -89,6 +100,17 @@ Payment.belongsTo(Invoice, { foreignKey: 'invoice_id', as: 'invoice' });
 // Ticket associations
 Ticket.belongsTo(Customer, { foreignKey: 'customer_id', as: 'customer' });
 Ticket.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
+Ticket.hasMany(TicketComment, { foreignKey: 'ticket_id', as: 'comments' });
+
+// TicketComment associations
+TicketComment.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
+TicketComment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// AuditLog associations
+AuditLog.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// LeadAssignmentRule associations
+LeadAssignmentRule.belongsTo(User, { foreignKey: 'assign_to', as: 'assignee' });
 
 // Note associations
 Note.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
@@ -153,9 +175,13 @@ export {
   Quotation,
   QuotationItem,
   Invoice,
+  InvoiceItem,
   Payment,
   Ticket,
+  TicketComment,
   Note,
+  AuditLog,
+  LeadAssignmentRule,
   Company,
   ServiceCatalog,
   ServiceLineItem,

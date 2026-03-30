@@ -59,6 +59,15 @@ class InvoiceController {
       return errorResponse(res, error.message);
     }
   }
+
+  async sendReminder(req, res) {
+    try {
+      await invoiceService.sendReminder(req.params.id);
+      return successResponse(res, null, 'Reminder sent successfully');
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
 }
 
 export default new InvoiceController();

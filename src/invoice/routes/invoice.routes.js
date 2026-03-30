@@ -10,6 +10,7 @@ router.post('/generate-from-quotation', authenticate, invoiceController.createFr
 router.get('/', authenticate, invoiceController.getAll);
 router.get('/:id', authenticate, invoiceController.getById);
 router.put('/:id', authenticate, validate(updateInvoiceDto), invoiceController.update);
+router.post('/:id/reminder', authenticate, invoiceController.sendReminder);
 router.delete('/:id', authenticate, invoiceController.delete);
 
 export default router;

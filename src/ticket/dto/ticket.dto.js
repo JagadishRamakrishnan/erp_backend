@@ -5,6 +5,7 @@ const createTicketDto = Joi.object({
   subject: Joi.string().min(2).max(200).required(),
   description: Joi.string().allow('', null).optional(),
   status: Joi.string().valid('Open', 'In Progress', 'Closed').optional(),
+  priority: Joi.string().valid('Low', 'Medium', 'High', 'Urgent').optional(),
   assigned_to: Joi.number().allow(null).optional()
 });
 
@@ -13,6 +14,7 @@ const updateTicketDto = Joi.object({
   subject: Joi.string().min(2).max(200).optional(),
   description: Joi.string().allow('', null).optional(),
   status: Joi.string().valid('Open', 'In Progress', 'Closed').optional(),
+  priority: Joi.string().valid('Low', 'Medium', 'High', 'Urgent').optional(),
   assigned_to: Joi.number().allow(null).optional()
 });
 

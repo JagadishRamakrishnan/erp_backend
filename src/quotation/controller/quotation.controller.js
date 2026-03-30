@@ -23,6 +23,19 @@ class QuotationController {
     }
   }
 
+  async createFromMultipleServices(req, res) {
+    try {
+      const { serviceIds, customerId, dealId } = req.body;
+      if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
+        return errorResponse(res, 'serviceIds array is required', 400);
+      }
+      const quotation = await quotationService.createFromMultipleServices(serviceIds, customerId, dealId, req.user.id);
+      return successResponse(res, quotation, 'Quotation generated from service templates', 201);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
   async getAll(req, res) {
     try {
       const quotations = await quotationService.getAllQuotations(req.query);

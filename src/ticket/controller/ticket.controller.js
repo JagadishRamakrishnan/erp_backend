@@ -49,6 +49,18 @@ class TicketController {
       return errorResponse(res, error.message);
     }
   }
+
+  async addComment(req, res) {
+    try {
+      const comment = await ticketService.addComment(req.params.id, {
+        ...req.body,
+        user_id: req.user.id
+      });
+      return successResponse(res, comment, 'Comment added successfully', 201);
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
 }
 
 export default new TicketController();

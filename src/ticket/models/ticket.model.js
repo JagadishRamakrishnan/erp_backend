@@ -32,6 +32,10 @@ const Ticket = db.sequelize.define('Ticket', {
     type: DataTypes.ENUM('Open', 'In Progress', 'Closed'),
     defaultValue: 'Open'
   },
+  priority: {
+    type: DataTypes.ENUM('Low', 'Medium', 'High', 'Urgent'),
+    defaultValue: 'Medium'
+  },
   assigned_to: {
     type: DataTypes.BIGINT,
     allowNull: true,
@@ -39,6 +43,18 @@ const Ticket = db.sequelize.define('Ticket', {
       model: 'users',
       key: 'id'
     }
+  },
+  first_response_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  resolution_due_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  resolved_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'tickets',

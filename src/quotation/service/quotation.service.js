@@ -134,7 +134,6 @@ class QuotationService {
     });
     if (!service) throw new Error('Service not found');
 
-    // Build quotation items from service line items
     const items = service.lineItems && service.lineItems.length > 0
       ? service.lineItems.map(item => ({
           product_name: item.item_name,
@@ -149,7 +148,6 @@ class QuotationService {
           total: parseFloat(service.unit_price) || 0
         }];
 
-    // Calculate totals
     const subtotal = items.reduce((sum, item) => sum + parseFloat(item.total), 0);
     const taxAmount = (subtotal * (parseFloat(service.tax_percent) || 0)) / 100;
     const totalAmount = subtotal + taxAmount;
@@ -162,6 +160,59 @@ class QuotationService {
       status: 'Draft',
       created_by: createdBy,
       items
+    });
+  }
+
+  // Create a quotation from MULTIPLE service templates (merges all line items)
+  async createFromMultipleServices(serviceIds, customerId, dealId, createdBy) {
+    const ServiceCatalog = (await import('../../service_catalog/models/service_catalog.model.js')).default;
+    const ServiceLineItem = (await import('../../service_catalog/models/service_line_item.model.js')).default;
+
+    const services = await ServiceCatalog.findAll({
+      where: { id: serviceIds },
+      include: [{ model: ServiceLineItem, as: 'lineItems' }]
+    });
+
+    if (!services || services.length === 0) throw new Error('No services found');
+
+    let allItems = [];
+    let totalTax = 0;
+
+    for (const service of services) {
+      const lineItems = service.lineItems && service.lineItems.length > 0
+        ? service.lineItems.map(item => ({
+            product_name: item.item_name,
+            description: service.name, // Add service name as description context
+            quantity: parseFloat(item.qty) || 1,
+            price: parseFloat(item.unit_price) || 0,
+            tax_percent: parseFloat(service.tax_percent) || 0,
+            total: (parseFloat(item.qty) || 1) * (parseFloat(item.unit_price) || 0)
+          }))
+        : [{
+            product_name: service.name,
+            quantity: 1,
+            price: parseFloat(service.unit_price) || 0,
+            tax_percent: parseFloat(service.tax_percent) || 0,
+            total: parseFloat(service.unit_price) || 0
+          }];
+
+      allItems = [...allItems, ...lineItems];
+
+      const serviceSub = lineItems.reduce((s, i) => s + i.total, 0);
+      totalTax += (serviceSub * (parseFloat(service.tax_percent) || 0)) / 100;
+    }
+
+    const subtotal = allItems.reduce((sum, item) => sum + parseFloat(item.total), 0);
+    const totalAmount = subtotal + totalTax;
+
+    return await this.createQuotation({
+      customer_id: customerId,
+      deal_id: dealId || null,
+      total_amount: totalAmount,
+      tax_amount: totalTax,
+      status: 'Draft',
+      created_by: createdBy,
+      items: allItems
     });
   }
 }

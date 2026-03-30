@@ -19,6 +19,8 @@ import whatsappRoutes from './whatsapp/routes/whatsapp.routes.js';
 import companyRoutes from './company/routes/company.routes.js';
 import dashboardRoutes from './dashboard/routes/dashboard.routes.js';
 import reportsRoutes from './reports/routes/reports.routes.js';
+import auditLogRoutes from './reports/routes/auditLog.routes.js';
+import leadAssignmentRuleRoutes from './lead/routes/leadAssignmentRule.routes.js';
 import serviceCatalogRoutes from './service_catalog/routes/service_catalog.routes.js';
 
 // Use routes
@@ -38,6 +40,8 @@ router.use('/whatsapp', whatsappRoutes);
 router.use('/companies', companyRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportsRoutes);
+router.use('/audit-logs', auditLogRoutes);
+router.use('/lead-assignment-rules', leadAssignmentRuleRoutes);
 router.use('/services', serviceCatalogRoutes);
 
 export default router;
