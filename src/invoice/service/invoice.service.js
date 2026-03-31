@@ -19,10 +19,19 @@ class InvoiceService {
     });
 
     if (items && items.length > 0) {
-      const invoiceItems = items.map(item => ({
-        ...item,
-        invoice_id: invoice.id
-      }));
+      const invoiceItems = items.map(item => {
+        const quantity = parseFloat(item.quantity) || 0;
+        const unitPrice = parseFloat(item.unit_price) || 0;
+        const taxPercent = parseFloat(item.tax_percent) || 0;
+        const total = quantity * unitPrice * (1 + (taxPercent / 100));
+        
+        return {
+          ...item,
+          invoice_id: invoice.id,
+          total: item.total || total.toFixed(2),
+          tax_percent: item.tax_percent || 0
+        };
+      });
       await InvoiceItem.bulkCreate(invoiceItems);
     }
 
@@ -82,10 +91,19 @@ class InvoiceService {
       // Sync items: delete old, create new (simple approach)
       await InvoiceItem.destroy({ where: { invoice_id: id } });
       if (items.length > 0) {
-        const invoiceItems = items.map(item => ({
-          ...item,
-          invoice_id: id
-        }));
+        const invoiceItems = items.map(item => {
+          const quantity = parseFloat(item.quantity) || 0;
+          const unitPrice = parseFloat(item.unit_price) || 0;
+          const taxPercent = parseFloat(item.tax_percent) || 0;
+          const total = quantity * unitPrice * (1 + (taxPercent / 100));
+          
+          return {
+            ...item,
+            invoice_id: id,
+            total: item.total || total.toFixed(2),
+            tax_percent: item.tax_percent || 0
+          };
+        });
         await InvoiceItem.bulkCreate(invoiceItems);
       }
     }

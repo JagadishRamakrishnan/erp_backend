@@ -16,7 +16,7 @@ const LeadAssignmentRule = db.sequelize.define('LeadAssignmentRule', {
     allowNull: false
   },
   criteria_value: {
-    type: DataTypes.STRING(150), // e.g. 'Facebook', '1'
+    type: DataTypes.STRING(255), // e.g. '["1", "2"]'
     allowNull: false
   },
   assign_to: {
@@ -28,8 +28,8 @@ const LeadAssignmentRule = db.sequelize.define('LeadAssignmentRule', {
     }
   },
   priority: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
+    type: DataTypes.STRING(100), // e.g. '[0, 5]'
+    defaultValue: '0'
   },
   is_active: {
     type: DataTypes.BOOLEAN,

@@ -34,16 +34,36 @@ class LeadService {
 
   async autoAssign(leadData) {
     const rules = await LeadAssignmentRule.findAll({
-      where: { is_active: true },
-      order: [['priority', 'DESC']]
+      where: { is_active: true }
     });
 
-    for (const rule of rules) {
-      if (rule.criteria_field === 'source' && leadData.source === rule.criteria_value) {
+    // Manually sort rules by highest priority value in the array
+    const sortedRules = rules.sort((a, b) => {
+      const getP = (rule) => {
+        try {
+          const arr = JSON.parse(rule.priority);
+          return Array.isArray(arr) ? Math.max(...arr, 0) : parseInt(rule.priority) || 0;
+        } catch (e) { return parseInt(rule.priority) || 0; }
+      };
+      return getP(b) - getP(a);
+    });
+
+    for (const rule of sortedRules) {
+      let values = [];
+      try {
+        values = (typeof rule.criteria_value === 'string' && rule.criteria_value.startsWith('[')) 
+                 ? JSON.parse(rule.criteria_value) 
+                 : [rule.criteria_value];
+      } catch (e) { values = [rule.criteria_value]; }
+
+      if (rule.criteria_field === 'source' && values.includes(leadData.source)) {
         return rule.assign_to;
       }
-      if (rule.criteria_field === 'service' && leadData.service_ids?.includes(parseInt(rule.criteria_value))) {
-        return rule.assign_to;
+      if (rule.criteria_field === 'service') {
+        const leadServices = Array.isArray(leadData.service_ids) ? leadData.service_ids.map(id => String(id)) : [];
+        if (values.some(v => leadServices.includes(String(v)))) {
+          return rule.assign_to;
+        }
       }
     }
     return null;
