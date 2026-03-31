@@ -1,6 +1,7 @@
 import ServiceCatalog from '../models/service_catalog.model.js';
 import ServiceLineItem from '../models/service_line_item.model.js';
 import User from '../../user/models/user.model.js';
+import ServiceActionPlan from '../models/service_action_plan.model.js';
 import db from '../../db/index.js';
 
 class ServiceCatalogService {
@@ -14,6 +15,7 @@ class ServiceCatalogService {
       where,
       include: [
         { model: ServiceLineItem, as: 'lineItems' },
+        { model: ServiceActionPlan, as: 'actionPlans' },
         { model: User, as: 'createdBy', attributes: ['id', 'name'] }
       ],
       order: [['created_at', 'DESC']]
@@ -24,13 +26,14 @@ class ServiceCatalogService {
     return await ServiceCatalog.findByPk(id, {
       include: [
         { model: ServiceLineItem, as: 'lineItems' },
+        { model: ServiceActionPlan, as: 'actionPlans' },
         { model: User, as: 'createdBy', attributes: ['id', 'name'] }
       ]
     });
   }
 
   async create(data) {
-    const { line_items = [], ...serviceData } = data;
+    const { line_items = [], action_plans = [], ...serviceData } = data;
 
     const service = await ServiceCatalog.create(serviceData);
 
@@ -42,11 +45,19 @@ class ServiceCatalogService {
       await ServiceLineItem.bulkCreate(itemsWithServiceId);
     }
 
+    if (action_plans.length > 0) {
+      const plansWithServiceId = action_plans.map(plan => ({
+        ...plan,
+        service_id: service.id
+      }));
+      await ServiceActionPlan.bulkCreate(plansWithServiceId);
+    }
+
     return this.getById(service.id);
   }
 
   async update(id, data) {
-    const { line_items, ...serviceData } = data;
+    const { line_items, action_plans, ...serviceData } = data;
     const service = await ServiceCatalog.findByPk(id);
     if (!service) return null;
 
@@ -64,6 +75,18 @@ class ServiceCatalogService {
       }
     }
 
+    // Replace action plans if provided
+    if (action_plans !== undefined) {
+      await ServiceActionPlan.destroy({ where: { service_id: id } });
+      if (action_plans.length > 0) {
+        const plansWithServiceId = action_plans.map(plan => ({
+          ...plan,
+          service_id: id
+        }));
+        await ServiceActionPlan.bulkCreate(plansWithServiceId);
+      }
+    }
+
     return this.getById(id);
   }
 
@@ -71,6 +94,7 @@ class ServiceCatalogService {
     const service = await ServiceCatalog.findByPk(id);
     if (!service) return null;
     await ServiceLineItem.destroy({ where: { service_id: id } });
+    await ServiceActionPlan.destroy({ where: { service_id: id } });
     await service.destroy();
     return true;
   }

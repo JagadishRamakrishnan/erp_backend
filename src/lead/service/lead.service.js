@@ -4,6 +4,8 @@ import User from '../../user/models/user.model.js';
 import { logAudit } from '../../auditHelper.js';
 import ServiceCatalog from '../../service_catalog/models/service_catalog.model.js';
 import ServiceLineItem from '../../service_catalog/models/service_line_item.model.js';
+import ServiceActionPlan from '../../service_catalog/models/service_action_plan.model.js';
+import Task from '../../task/models/task.model.js';
 
 class LeadService {
   async createLead(leadData, req = null) {
@@ -22,9 +24,41 @@ class LeadService {
       assigned_to: assignedTo || data.assigned_to
     });
     
-    if (service_ids && Array.isArray(service_ids)) {
-      const ids = service_ids.map(id => parseInt(id)).filter(id => !isNaN(id));
-      if (ids.length > 0) await lead.setInterestedServices(ids);
+    // Always include General Sales Process (ID: 2)
+    const finalServiceIds = Array.isArray(service_ids) ? [...service_ids] : [];
+    if (!finalServiceIds.includes(2)) {
+      finalServiceIds.push(2);
+    }
+
+    if (finalServiceIds.length > 0) {
+      const ids = finalServiceIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+      await lead.setInterestedServices(ids);
+      
+      // Automatically generate tasks based on Service Action Plans
+      const actionPlans = await ServiceActionPlan.findAll({
+        where: { service_id: ids }
+      });
+      
+      if (actionPlans.length > 0) {
+        const tasksToCreate = actionPlans.map(plan => {
+          const dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + plan.offset_days);
+          
+          return {
+            title: plan.title,
+            description: plan.description || 'Auto-generated from service action plan',
+            status: 'Pending',
+            priority: plan.priority || 'Medium',
+            due_date: dueDate,
+            assigned_to: lead.assigned_to,
+            created_by: lead.created_by || lead.assigned_to,
+            related_type: 'Lead',
+            related_id: lead.id
+          };
+        });
+        
+        await Task.bulkCreate(tasksToCreate);
+      }
     }
     
     if (req) await logAudit(req, 'CREATE', 'Lead', lead.id, { name: lead.name });

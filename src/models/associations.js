@@ -18,6 +18,7 @@ import Company from '../company/models/company.model.js';
 import ServiceCatalog from '../service_catalog/models/service_catalog.model.js';
 import ServiceLineItem from '../service_catalog/models/service_line_item.model.js';
 import LeadServices from '../lead/models/lead_services.model.js';
+import ServiceActionPlan from '../service_catalog/models/service_action_plan.model.js';
 
 // User associations
 User.hasMany(Lead, { foreignKey: 'assigned_to', as: 'assignedLeads' });
@@ -64,8 +65,11 @@ ServiceCatalog.hasMany(ServiceLineItem, { foreignKey: 'service_id', as: 'lineIte
 ServiceCatalog.hasMany(Lead, { foreignKey: 'service_id', as: 'leads_single' }); 
 ServiceCatalog.belongsToMany(Lead, { through: LeadServices, foreignKey: 'service_id', otherKey: 'lead_id', as: 'leads' });
 ServiceCatalog.hasMany(Deal, { foreignKey: 'service_id', as: 'deals' });
+ServiceCatalog.hasMany(ServiceActionPlan, { foreignKey: 'service_id', as: 'actionPlans' });
 ServiceCatalog.belongsTo(User, { foreignKey: 'created_by', as: 'createdBy' });
 ServiceLineItem.belongsTo(ServiceCatalog, { foreignKey: 'service_id', as: 'service' });
+ServiceActionPlan.belongsTo(ServiceCatalog, { foreignKey: 'service_id', as: 'service' });
+ServiceActionPlan.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
 // Task associations
 Task.belongsTo(User, { foreignKey: 'assigned_to', as: 'assignedTo' });
@@ -191,5 +195,6 @@ export {
   AdSet,
   Ad,
   AdInsight,
-  MetaLead
+  MetaLead,
+  ServiceActionPlan
 };
