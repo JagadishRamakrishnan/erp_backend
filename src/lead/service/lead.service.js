@@ -10,6 +10,20 @@ import Task from '../../task/models/task.model.js';
 class LeadService {
   async createLead(leadData, req = null) {
     const { service_ids, ...data } = leadData;
+    
+    // Duplicate Check: Check if lead with same name and phone already exists
+    if (data.phone && data.name) {
+      const existingLead = await Lead.findOne({ 
+        where: { 
+          name: data.name,
+          phone: data.phone
+        } 
+      });
+      if (existingLead) {
+        throw new Error(`Duplicate detected: Lead with name "${data.name}" and phone "${data.phone}" already exists.`);
+      }
+    }
+
     const leadCode = `LEAD-${Date.now()}`;
     
     // Auto Assignment
