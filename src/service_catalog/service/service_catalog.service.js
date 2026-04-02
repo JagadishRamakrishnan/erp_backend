@@ -11,15 +11,31 @@ class ServiceCatalogService {
     if (filters.category) where.category = filters.category;
     if (filters.is_active !== undefined) where.is_active = filters.is_active === 'true';
 
-    return await ServiceCatalog.findAll({
+    const res = await ServiceCatalog.findAll({
       where,
       include: [
         { model: ServiceLineItem, as: 'lineItems' },
         { model: ServiceActionPlan, as: 'actionPlans' },
         { model: User, as: 'createdBy', attributes: ['id', 'name'] }
       ],
-      order: [['created_at', 'DESC']]
+      order: [['id', 'ASC']]
     });
+
+    // Safeguard: Ensure General Sales Process (ID 0) is always there
+    const hasDefault = res.some(s => s.id === 0 || s.id === '0' || s.name === 'General Sales Process');
+    if (!hasDefault && Object.keys(where).length === 0) {
+      res.unshift({
+        id: 0,
+        name: 'General Sales Process',
+        category: 'Other',
+        unit_price: 0,
+        tax_percent: 18,
+        description: 'Default sales process template (Always active)',
+        is_active: true,
+        lineItems: []
+      });
+    }
+    return res;
   }
 
   async getById(id) {

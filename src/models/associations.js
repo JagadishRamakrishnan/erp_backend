@@ -43,6 +43,8 @@ Lead.hasMany(Customer, { foreignKey: 'created_from_lead', as: 'customers' });
 Lead.hasMany(Deal, { foreignKey: 'lead_id', as: 'deals' });
 Lead.belongsTo(ServiceCatalog, { foreignKey: 'service_id', as: 'service' });
 Lead.belongsToMany(ServiceCatalog, { through: LeadServices, foreignKey: 'lead_id', otherKey: 'service_id', as: 'interestedServices' });
+Lead.hasMany(Note, { foreignKey: 'related_id', constraints: false, scope: { related_type: 'Lead' }, as: 'notes' });
+Note.belongsTo(Lead, { foreignKey: 'related_id', constraints: false, as: 'lead' });
 
 // Customer associations
 Customer.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });

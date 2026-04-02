@@ -4,6 +4,8 @@ import Lead from '../../lead/models/lead.model.js';
 import User from '../../user/models/user.model.js';
 import Payment from '../../payment/models/payment.model.js';
 import Activity from '../../activity/models/activity.model.js';
+import ServiceCatalog from '../../service_catalog/models/service_catalog.model.js';
+import Note from '../../note/models/note.model.js';
 
 class ReportsService {
   async getReportsData() {
@@ -216,7 +218,53 @@ class ReportsService {
     if (type === 'deals') {
       data = await Deal.findAll({ include: [{ model: User, as: 'assignedTo', attributes: ['name'] }] });
     } else if (type === 'leads') {
-      data = await Lead.findAll();
+      data = await Lead.findAll({
+        include: [
+          { model: ServiceCatalog, as: 'service', attributes: ['name'] },
+          { model: Note, as: 'notes', attributes: ['note', 'created_at'] },
+          { model: User, as: 'assignedTo', attributes: ['name'] }
+        ]
+      });
+
+      if (data.length === 0) return "";
+      
+      const csvHeader = ['Lead Code', 'Name', 'Email', 'Phone', 'Company', 'Source', 'Status', 'Assigned To', 'Created At', 'Interested Service', 'Notes'].join(',');
+      
+      const csvRows = data.map(lead => {
+        const plainLead = lead.get({ plain: true });
+        
+        // Aggregate all notes: internal_summary + historical notes
+        let allNotes = [];
+        if (plainLead.internal_summary) allNotes.push(`[Summary] ${plainLead.internal_summary}`);
+        if (plainLead.notes && plainLead.notes.length > 0) {
+          plainLead.notes.forEach(n => {
+            const date = new Date(n.created_at).toLocaleDateString();
+            allNotes.push(`[${date}] ${n.note}`);
+          });
+        }
+        
+        const noteStr = allNotes.join(' | ');
+        const serviceName = plainLead.service?.name || '';
+        const assignedName = plainLead.assignedTo?.name || '';
+        
+        const row = [
+          plainLead.lead_code,
+          plainLead.name,
+          plainLead.email,
+          plainLead.phone,
+          plainLead.company,
+          plainLead.source,
+          plainLead.status,
+          assignedName,
+          new Date(plainLead.created_at).toISOString().split('T')[0],
+          serviceName,
+          noteStr
+        ];
+        
+        return row.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(',');
+      });
+      
+      return [csvHeader, ...csvRows].join('\n');
     } else if (type === 'revenue') {
       data = await Payment.findAll();
     }

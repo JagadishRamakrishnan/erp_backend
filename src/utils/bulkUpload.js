@@ -59,79 +59,29 @@ export const parseFile = (filePath) => {
     
     let data;
     
-    if (ext === '.csv') {
-      // Handle CSV files - simple approach
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      console.log('CSV content preview:', fileContent.substring(0, 200));
-      
-      const lines = fileContent.split('\n').filter(line => line.trim());
-      if (lines.length < 2) {
-        throw new Error('CSV file must have at least a header row and one data row');
-      }
-      
-      const headers = lines[0].split(',').map(h => h.trim());
-      console.log('CSV headers:', headers);
-      
-      data = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        const row = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] || '';
-        });
-        data.push(row);
-      }
-      
-    } else if (ext === '.xlsx' || ext === '.xls') {
-      // Handle Excel files - try different approaches
+    if (ext === '.csv' || ext === '.xlsx' || ext === '.xls') {
+      // Use XLSX to parse everything - it handles CSV with commas/quotes correctly
       const fileBuffer = fs.readFileSync(filePath);
-      console.log('Excel file buffer size:', fileBuffer.length);
-      
-      // Check if file is actually an Excel file by looking at the header
-      const fileHeader = fileBuffer.toString('hex', 0, 8);
-      console.log('File header (hex):', fileHeader);
-      
-      // Excel files should start with specific signatures
-      const isXLSX = fileHeader.startsWith('504b0304') || fileHeader.startsWith('504b0506');
-      const isXLS = fileHeader.startsWith('d0cf11e0');
-      
-      if (!isXLSX && !isXLS) {
-        throw new Error('File does not appear to be a valid Excel file');
-      }
       
       let workbook;
       try {
-        // Try reading as buffer with minimal options
-        workbook = XLSX.read(fileBuffer, { 
-          type: 'buffer',
-          raw: true
-        });
+        workbook = XLSX.read(fileBuffer, { type: 'buffer', raw: true });
       } catch (error) {
-        console.log('Buffer read failed:', error.message);
-        throw new Error('Could not parse Excel file. Please try saving as CSV format.');
+        console.error('XLSX parse error:', error);
+        throw new Error(`Could not parse ${ext.substring(1).toUpperCase()} file. Please verify the format.`);
       }
-      
+
       if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
-        throw new Error('No sheets found in the Excel file');
+        throw new Error('No sheets found in the file');
       }
-      
-      console.log('Excel sheets found:', workbook.SheetNames);
-      
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      
-      if (!worksheet) {
-        throw new Error('Could not read the worksheet');
-      }
-      
-      // Convert to JSON with minimal options
+
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       data = XLSX.utils.sheet_to_json(worksheet, {
         defval: '',
         blankrows: false
       });
       
-      console.log('Excel data parsed:', data.length, 'rows');
-      
+      console.log(`${ext.substring(1).toUpperCase()} data parsed:`, data.length, 'rows');
     } else {
       throw new Error('Unsupported file format. Please use .xlsx, .xls, or .csv files');
     }

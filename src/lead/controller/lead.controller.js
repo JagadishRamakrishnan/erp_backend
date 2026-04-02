@@ -109,7 +109,7 @@ class LeadController {
             company: data[i].company?.toString().trim() || null,
             source: data[i].source?.toString().trim() || 'Bulk Upload',
             status: data[i].status?.toString().trim() || 'New',
-            assigned_to: data[i].assigned_to ? parseInt(data[i].assigned_to) : null,
+            assigned_to: (data[i].assigned_to || data[i]['assigned_to(optional)']) ? parseInt(data[i].assigned_to || data[i]['assigned_to(optional)']) : null,
             created_by: req.user.id
           };
 
@@ -137,10 +137,10 @@ class LeadController {
   async downloadTemplate(req, res) {
     try {
       // Create CSV content instead of Excel
-      const csvHeaders = 'name,email,phone,company,source,status,assigned_to\n';
+      const csvHeaders = 'name,email,phone,company,source,status,assigned_to(optional)\n';
       const csvData = [
         'John Doe,john@example.com,9876543210,ABC Corp,Website,New,1',
-        'Jane Smith,jane@example.com,9876543211,XYZ Ltd,Referral,Contacted,2'
+        'Jane Smith,jane@example.com,9876543211,XYZ Ltd,Referral,Contacted,-'
       ].join('\n');
       
       const csvContent = csvHeaders + csvData;

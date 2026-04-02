@@ -24,7 +24,7 @@ const Lead = db.sequelize.define('Lead', {
     }
   },
   phone: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.STRING(100),
     allowNull: true
   },
   company: {
