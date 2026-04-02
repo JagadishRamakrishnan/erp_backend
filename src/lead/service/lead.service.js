@@ -24,11 +24,7 @@ class LeadService {
       assigned_to: assignedTo || data.assigned_to
     });
     
-    // Always include General Sales Process (ID: 2)
     const finalServiceIds = Array.isArray(service_ids) ? [...service_ids] : [];
-    if (!finalServiceIds.includes(2)) {
-      finalServiceIds.push(2);
-    }
 
     if (finalServiceIds.length > 0) {
       const ids = finalServiceIds.map(id => parseInt(id)).filter(id => !isNaN(id));
