@@ -1,10 +1,20 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize } from "sequelize";
 
-const sequelize = new Sequelize("mysql://dutch:DutchDB123@167.71.229.209:3306/crm");
+const sequelize = new Sequelize(
+  "crm",
+  "root",
+  "Root@12345",
+  {
+    host: "localhost",
+    port: 3306,
+    dialect: "mysql",
+    logging: false,
+  }
+);
 
 const db = {
   sequelize,
-  Sequelize
+  Sequelize,
 };
 
 export default db;

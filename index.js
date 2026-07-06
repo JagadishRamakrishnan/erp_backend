@@ -41,20 +41,20 @@ db.sequelize.sync()
       const userCount = await User.count();
 
       if (userCount === 0) {
-        console.log('No users found. Creating default "Atelier" user...');
+        console.log('No users found. Creating default "KlickEdu" user...');
 
         // Password will be automatically hashed by User model's beforeCreate hook
         await User.create({
-          name: 'Atelier',
-          email: 'atelier@gmail.com',
+          name: 'KlickEdu',
+          email: 'klickedu@gmail.com',
           password: '12345678',
           phone: '9876543210',
           role: 'Admin',
           status: true
         });
 
-        console.log('✅ Default user "Atelier" created successfully!');
-        console.log('📧 Email: atelier@gmail.com');
+        console.log('✅ Default user "KlickEdu" created successfully!');
+        console.log('📧 Email: klickedu@gmail.com');
         console.log('🔑 Password: 12345678');
       } else {
         console.log(`Users table already has ${userCount} user(s).`);
